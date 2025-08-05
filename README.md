@@ -45,7 +45,7 @@ A Model Context Protocol (MCP) server that connects to Interactive Brokers API f
 1. **Download and install** TWS or IB Gateway from Interactive Brokers
 2. **Enable API access**:
    - In TWS: Go to File → Global Configuration → API → Settings
-   - Check "Enable ActiveX and Socket Clients"
+   - Check "Enable ActiveX and Socket Clients" --only for Windows
    - Add trusted IP addresses (127.0.0.1 for local use)
 3. **Configure ports**:
    - IB Gateway: Default port 4001
