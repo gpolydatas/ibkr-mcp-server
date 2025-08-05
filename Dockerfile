@@ -1,43 +1,24 @@
-name: Build and Push Docker Image
+FROM python:3.11-slim
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+# Set working directory
+WORKDIR /app
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+# Copy requirements first for better caching
+COPY requirements.txt .
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+# Copy the application code
+COPY . .
 
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+# Expose the port (if your MCP server uses a specific port)
+EXPOSE 8000
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+# Run the MCP server
+CMD ["python", "ibkr_mcp_server.py"]
